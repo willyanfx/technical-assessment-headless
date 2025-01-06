@@ -114,7 +114,7 @@ export async function shopifyFetch<T>({
   }
 }
 
-const removeEdgesAndNodes = <T>(array: Connection<T>): T[] => {
+export const removeEdgesAndNodes = <T>(array: Connection<T>): T[] => {
   return array.edges.map((edge) => edge?.node);
 };
 
@@ -143,7 +143,7 @@ const reshapeCollection = (collection: ShopifyCollection): Collection | undefine
   };
 };
 
-const reshapeCollections = (collections: ShopifyCollection[]) => {
+export const reshapeCollections = (collections: ShopifyCollection[]) => {
   const reshapedCollections = [];
 
   for (const collection of collections) {
@@ -159,7 +159,7 @@ const reshapeCollections = (collections: ShopifyCollection[]) => {
   return reshapedCollections;
 };
 
-const reshapeImages = (images: Connection<Image>, productTitle: string) => {
+export const reshapeImages = (images: Connection<Image>, productTitle: string) => {
   const flattened = removeEdgesAndNodes(images);
 
   return flattened.map((image) => {
@@ -171,7 +171,7 @@ const reshapeImages = (images: Connection<Image>, productTitle: string) => {
   });
 };
 
-const reshapeProduct = (product: ShopifyProduct, filterHiddenProducts: boolean = true) => {
+export const reshapeProduct = (product: ShopifyProduct, filterHiddenProducts: boolean = true) => {
   if (!product || (filterHiddenProducts && product.tags.includes(HIDDEN_PRODUCT_TAG))) {
     return undefined;
   }
@@ -185,7 +185,7 @@ const reshapeProduct = (product: ShopifyProduct, filterHiddenProducts: boolean =
   };
 };
 
-const reshapeProducts = (products: ShopifyProduct[]) => {
+export const reshapeProducts = (products: ShopifyProduct[]) => {
   const reshapedProducts = [];
 
   for (const product of products) {
