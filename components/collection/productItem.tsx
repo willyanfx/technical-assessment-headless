@@ -151,7 +151,7 @@ function ColorSwatch({
   return (
     <>
       <button
-        className={`tooltip-button h-6 w-6 rounded-full border-2 hover:border-black ${
+        className={`tooltip-button h-6 w-6 rounded-full border-2 hover:border-zinc-600 focus:outline focus:outline-2 focus:outline-sky-600 ${
           isSelected ? 'border-sky-900' : 'border-transparent'
         } relative mr-1 ${isAvailable ? 'cursor-pointer' : 'opacity-30'}`}
         aria-label={`Select ${color.name} color`}
