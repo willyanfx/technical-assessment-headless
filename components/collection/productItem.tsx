@@ -1,9 +1,9 @@
 'use client';
 import Price from 'components/price';
-import { ProductColor, ProductTile } from 'lib/types';
+import { PriceDisplayProps, ProductColor, ProductImageProps, ProductTile } from 'lib/types';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 export function ProductItem({ product, loading }: { product: ProductTile; loading?: boolean }) {
   const initialColor = product.colors?.[0]?.name ?? '';
@@ -12,10 +12,16 @@ export function ProductItem({ product, loading }: { product: ProductTile; loadin
   const [selectedVariantImage, setVariantImage] = useState(initialImages);
   const [isAvailable, setIsAvailable] = useState(true);
 
-  const discount = product.discount ?? 0;
-  const discountedPrice = product.discount
-    ? String(product.price - (product.price * product.discount) / 100)
-    : null;
+  // Calculate discounted price once
+  const { discountedPrice, discount } = useMemo(
+    () => ({
+      discount: product.discount ?? 0,
+      discountedPrice: product.discount
+        ? String(product.price - (product.price * product.discount) / 100)
+        : null
+    }),
+    [product.price, product.discount]
+  );
 
   const handleChangeVariant = (color: string) => {
     setSelectedColor(color);
@@ -36,37 +42,28 @@ export function ProductItem({ product, loading }: { product: ProductTile; loadin
             <>
               {selectedVariantImage && (
                 <>
-                  <div className="absolute bottom-0 left-0 flex h-full w-full items-end justify-center bg-white opacity-0 transition-opacity duration-150 ease-out hover:opacity-100">
-                    <Image
-                      className="h-fit object-cover object-center"
-                      src={selectedVariantImage.secondary.url}
-                      alt={selectedVariantImage.secondary.altText || product.title}
-                      width={selectedVariantImage.secondary.width}
-                      height={selectedVariantImage.secondary.height}
-                      loading={loading ? 'lazy' : 'eager'}
+                  <div className="absolute bottom-0 left-0 flex h-full w-full items-end justify-center bg-white opacity-0 transition-all duration-150 ease-out hover:opacity-100">
+                    <ProductImage
+                      image={selectedVariantImage.secondary}
+                      title={product.title}
+                      loading={loading}
                     />
                   </div>
-                  <Image
-                    className="h-full w-full object-cover object-center transition-opacity hover:opacity-0 sm:h-full sm:w-full"
-                    src={selectedVariantImage.primary.url}
-                    alt={selectedVariantImage.primary.altText || product.title}
-                    width={selectedVariantImage.primary.width}
-                    height={selectedVariantImage.primary.height}
-                    loading={loading ? 'lazy' : 'eager'}
-                    blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkAAIAAAoAAv/lxKUAAAAASUVORK5CYII="
-                    placeholder="blur"
+                  <ProductImage
+                    image={selectedVariantImage.primary}
+                    title={product.title}
+                    loading={loading}
+                    className="h-full w-full object-cover object-center transition-all duration-300 ease-out hover:opacity-0 sm:h-full sm:w-full"
                   />
                 </>
               )}
             </>
           ) : (
-            <Image
-              className=""
-              src={product.featuredImage.url}
-              alt={product.featuredImage.altText ?? product.title}
-              width={product.featuredImage.width}
-              height={product.featuredImage.height}
-              loading={loading ? 'lazy' : 'eager'}
+            <ProductImage
+              image={product.featuredImage}
+              title={product.title}
+              loading={loading}
+              className="h-full w-full object-cover object-center transition-all duration-300 ease-out sm:h-full sm:w-full"
             />
           )}
         </div>
@@ -85,35 +82,58 @@ export function ProductItem({ product, loading }: { product: ProductTile; loadin
 
         <p className="text-left text-sm text-[#111]">{product.brand}</p>
         <h4 className="text-left text-base font-bold text-[#0A4874]">{product.title}</h4>
-        <small className="flex gap-2">
-          {product.discount ? (
-            <>
-              <span>
-                <s className="text-sm">
-                  <Price
-                    amount={String(product.price)}
-                    currencyCode={product.currency}
-                    currencyCodeClassName="hidden"
-                  />
-                </s>
-              </span>
-              <Price
-                className="text-red-500"
-                amount={discountedPrice!}
-                currencyCode={product.currency}
-                currencyCodeClassName="hidden"
-              />
-            </>
-          ) : (
-            <Price
-              amount={String(product.price)}
-              currencyCode={product.currency}
-              currencyCodeClassName="hidden"
-            />
-          )}
-        </small>
+        <PriceDisplay
+          price={product.price}
+          discountedPrice={discountedPrice}
+          currency={product.currency}
+          discount={discount}
+        />
       </div>
     </div>
+  );
+}
+
+function PriceDisplay({ price, discountedPrice, currency, discount }: PriceDisplayProps) {
+  return (
+    <small className="flex gap-2 text-sm">
+      {discount > 0 ? (
+        <>
+          <span>
+            <s>
+              <Price
+                amount={String(price)}
+                currencyCode={currency}
+                currencyCodeClassName="hidden"
+              />
+            </s>
+          </span>
+          <Price
+            className="text-red-500"
+            amount={discountedPrice ?? String(price)} //
+            currencyCode={currency}
+            currencyCodeClassName="hidden"
+          />
+        </>
+      ) : (
+        <Price amount={String(price)} currencyCode={currency} currencyCodeClassName="hidden" />
+      )}
+    </small>
+  );
+}
+
+function ProductImage({ image, title, loading, className = '' }: ProductImageProps) {
+  return (
+    <Image
+      className={className}
+      sizes="(max-width: 359px) 50vw, (max-width: 811px) 50vw, (max-width: 1099px) 25vw, (max-width: 1599px) 25vw, 25vw"
+      src={image.url}
+      alt={image.altText || title}
+      width={image.width}
+      height={image.height}
+      loading={loading ? 'lazy' : 'eager'}
+      blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkAAIAAAoAAv/lxKUAAAAASUVORK5CYII="
+      placeholder="blur"
+    />
   );
 }
 
@@ -121,24 +141,25 @@ function ColorSwatch({
   color,
   isAvailable,
   isSelected,
-  onClick,
-  onMouseEnter
+  onClick
 }: {
   color: any;
   isAvailable: boolean;
   isSelected: boolean;
   onClick: (event: React.MouseEvent<HTMLElement>) => void;
-  onMouseEnter?: (event: React.MouseEvent<HTMLElement>) => void;
 }) {
   return (
     <>
       <button
-        className={`h-6 w-6 rounded-full border-2 hover:border-black ${
+        className={`tooltip-button h-6 w-6 rounded-full border-2 hover:border-black ${
           isSelected ? 'border-sky-900' : 'border-transparent'
         } relative mr-1 ${isAvailable ? 'cursor-pointer' : 'opacity-30'}`}
         aria-label={`Select ${color.name} color`}
+        title={`Select ${color.name} color`}
+        role="button"
+        aria-disabled={!isAvailable}
         onClick={onClick}
-        onMouseEnter={onMouseEnter}
+        data-tooltip={color.name}
       >
         <span className="absolute inset-0.5 rounded-full" style={{ backgroundColor: color.code }} />
         {!isAvailable && (
@@ -151,7 +172,11 @@ function ColorSwatch({
 
 function IsOnSales({ text = 'On Sale!' }) {
   return (
-    <div className="absolute left-5 top-5 z-10 inline-flex h-7 items-center justify-center gap-3 overflow-hidden rounded-3xl border border-red-600 bg-white px-3 py-1.5">
+    <div
+      className="absolute left-5 top-5 z-10 inline-flex h-7 items-center justify-center gap-3 overflow-hidden rounded-3xl border border-red-600 bg-white px-3 py-1.5"
+      role="status"
+      aria-live="polite"
+    >
       <div
         className="h-4 text-center text-base font-medium leading-none text-red-600"
         aria-label="{text}"
