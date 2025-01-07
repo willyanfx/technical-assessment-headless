@@ -47,6 +47,7 @@ export function ProductItem({ product, loading }: { product: ProductTile; loadin
                       image={selectedVariantImage.secondary}
                       title={product.title}
                       loading={loading}
+                      className="h-full w-auto"
                     />
                   </div>
                   <ProductImage
