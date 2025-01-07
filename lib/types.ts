@@ -48,7 +48,7 @@ export type Price = {
 export type Metafield = {
   key: string;
   value: string;
-  reference: Reference | null;
+  reference?: Reference | null;
 };
 
 export type BaseProductTileVariant = {
