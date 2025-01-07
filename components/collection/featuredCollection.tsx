@@ -10,13 +10,10 @@ export default async function FeaturedCollection() {
     collection: 'frontpage'
   });
 
-  console.log('Structure::: ', homepageItems[2]);
-
   return (
     <section className="mx-auto max-w-screen-2xl px-4 py-16 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
       <div className="grid grid-cols-1 gap-y-4 sm:grid-cols-2 sm:gap-x-6 sm:gap-y-10 lg:grid-cols-3 lg:gap-x-8">
         {homepageItems.map((product) => {
-          console.log('Product:::', product);
           return <ProductItem key={product.id} product={transformProduct(product)} />;
         })}
       </div>
@@ -24,8 +21,10 @@ export default async function FeaturedCollection() {
   );
 }
 
-// Similar to the product fragment in lib/shopify/fragments/product.ts, however, this one is more detailed such as expecific fields such as metafields to get the sales discount or variants color hex and second image.
-//  TODO: make getCollectionProducts function flexible to accept custom fragments and variables
+// This fragment is similar to the product fragment found in `lib/shopify/fragments/product.ts`, but it includes more detailed information, such as specific fields like metafields for sales discounts, variant color hex codes, and a second image.
+
+// **TODO:** Make the `getCollectionProducts` function flexible to accept custom fragments and variables.
+
 const productFragment = /* GraphQL */ `
   fragment MoneyProductItem on MoneyV2 {
     amount
