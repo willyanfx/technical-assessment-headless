@@ -1,5 +1,5 @@
 export type ImageData = {
-  altText: string | null;
+  altText?: string | null;
   height: number;
   width: number;
   url: string;
@@ -28,5 +28,5 @@ export type ProductTile = {
   currency: string;
   discount?: number;
   colors?: ProductColor[] | null;
-  sizes?: (string | boolean)[];
+  sizes?: string[] | boolean;
 };
