@@ -1,20 +1,21 @@
-import { Carousel } from 'components/carousel';
-import { ThreeItemGrid } from 'components/grid/three-items';
+import FeaturedCollection from 'components/collection/featuredCollection';
 import Footer from 'components/layout/footer';
 
 export const metadata = {
-  description: 'High-performance ecommerce store built with Next.js, Vercel, and Shopify.',
+  title: 'Technical Assessment Test',
+  description: 'Product Tile',
   openGraph: {
     type: 'website'
   }
 };
 
-export default function HomePage() {
+export default async function HomePage() {
   return (
     <>
-      <ThreeItemGrid />
-      <Carousel />
+      <FeaturedCollection />
       <Footer />
     </>
   );
 }
+
+/* <Carousel /> */
