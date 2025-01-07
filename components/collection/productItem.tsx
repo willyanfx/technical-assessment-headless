@@ -12,6 +12,7 @@ export function ProductItem({ product, loading }: { product: ProductTile; loadin
   const [selectedColor, setSelectedColor] = useState<string>(initialColor);
   const [selectedVariantImage, setVariantImage] = useState(initialImages);
 
+  const discount = product.discount ?? 0;
   const discountedPrice = product.discount
     ? String(product.price - (product.price * product.discount) / 100)
     : null;
@@ -27,90 +28,91 @@ export function ProductItem({ product, loading }: { product: ProductTile; loadin
   console.log('Product:::', product);
 
   return (
-    <div className="mx-auto max-w-sm">
-      <div className="group relative grid items-center justify-center gap-2 overflow-hidden">
-        <Link href={`/product/${product.handle}`} key={product.id} prefetch={true}>
-          <div className="relative flex overflow-hidden rounded-lg border bg-white">
-            {product.discount && <Promo discountedPrice={String(product.discount)} />}
-            {product.colors && product.colors.length > 1 ? (
-              <>
-                {selectedVariantImage && (
-                  <>
+    <div className="group relative flex flex-col overflow-hidden rounded-lg">
+      {/* <div className="group relative grid items-center justify-center gap-2 overflow-hidden"> */}
+      <Link href={`/product/${product.handle}`} key={product.id} prefetch={true}>
+        <div className="relative flex overflow-hidden rounded-lg border bg-white">
+          {discount > 0 && <Promo discountedPrice={String(product.discount)} />}
+          {product.colors && product.colors.length > 1 ? (
+            <>
+              {selectedVariantImage && (
+                <>
+                  <div className="absolute bottom-0 left-0 flex h-full w-full justify-center bg-white opacity-0 transition-opacity duration-150 ease-out hover:opacity-100">
                     <Image
-                      className="transition-opacity hover:opacity-0"
-                      src={selectedVariantImage.primary.url}
-                      alt={selectedVariantImage.primary.altText || product.title}
-                      width={selectedVariantImage.primary.width}
-                      height={selectedVariantImage.primary.height}
-                      loading={loading ? 'lazy' : 'eager'}
-                      blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkAAIAAAoAAv/lxKUAAAAASUVORK5CYII="
-                      placeholder="blur"
-                    />
-                    <Image
-                      className="absolute top-0 opacity-0 transition-opacity duration-150 ease-out hover:opacity-100"
+                      className="h-fit object-cover object-center"
                       src={selectedVariantImage.secondary.url}
                       alt={selectedVariantImage.secondary.altText || product.title}
                       width={selectedVariantImage.secondary.width}
                       height={selectedVariantImage.secondary.height}
                       loading={loading ? 'lazy' : 'eager'}
                     />
-                  </>
-                )}
-              </>
-            ) : (
-              <Image
-                className="absolute top-0 opacity-0 transition-opacity duration-150 ease-out hover:opacity-100"
-                src={product.featuredImage.url}
-                alt={product.featuredImage.altText}
-                width={product.featuredImage.width}
-                height={product.featuredImage.height}
-                loading={loading ? 'lazy' : 'eager'}
-              />
-            )}
-          </div>
-        </Link>
-        <div className="px-4 pb-4">
-          {product.colors &&
-            product.colors.map((color: ProductColor) => (
-              <ColorSwatch
-                key={color.name}
-                isAvailable={color.isAvailable}
-                color={color}
-                isSelected={selectedColor === color.name}
-                onClick={() => handleChangeVariant(color.name)}
-              />
-            ))}
+                  </div>
+                  <Image
+                    className="h-full w-full object-cover object-center transition-opacity hover:opacity-0 sm:h-full sm:w-full"
+                    src={selectedVariantImage.primary.url}
+                    alt={selectedVariantImage.primary.altText || product.title}
+                    width={selectedVariantImage.primary.width}
+                    height={selectedVariantImage.primary.height}
+                    loading={loading ? 'lazy' : 'eager'}
+                    blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkAAIAAAoAAv/lxKUAAAAASUVORK5CYII="
+                    placeholder="blur"
+                  />
+                </>
+              )}
+            </>
+          ) : (
+            <Image
+              className=""
+              src={product.featuredImage.url}
+              alt={product.featuredImage.altText ?? product.title}
+              width={product.featuredImage.width}
+              height={product.featuredImage.height}
+              loading={loading ? 'lazy' : 'eager'}
+            />
+          )}
+        </div>
+      </Link>
+      <div className="pt- px-4 pb-4 pt-2">
+        {product.colors &&
+          product.colors.map((color: ProductColor) => (
+            <ColorSwatch
+              key={color.name}
+              isAvailable={color.isAvailable}
+              color={color}
+              isSelected={selectedColor === color.name}
+              onClick={() => handleChangeVariant(color.name)}
+            />
+          ))}
 
-          <p className="text-left text-sm text-[#111]">{product.brand}</p>
-          <h4 className="text-left text-base font-bold text-[#0A4874]">{product.title}</h4>
-          <small className="flex gap-2">
-            {product.discount ? (
-              <>
-                <span>
-                  <s className="text-sm">
-                    <Price
-                      amount={String(product.price)}
-                      currencyCode={product.currency}
-                      currencyCodeClassName="hidden"
-                    />
-                  </s>
-                </span>
-                <Price
-                  className="text-red-500"
-                  amount={discountedPrice!}
-                  currencyCode={product.currency}
-                  currencyCodeClassName="hidden"
-                />
-              </>
-            ) : (
+        <p className="text-left text-sm text-[#111]">{product.brand}</p>
+        <h4 className="text-left text-base font-bold text-[#0A4874]">{product.title}</h4>
+        <small className="flex gap-2">
+          {product.discount ? (
+            <>
+              <span>
+                <s className="text-sm">
+                  <Price
+                    amount={String(product.price)}
+                    currencyCode={product.currency}
+                    currencyCodeClassName="hidden"
+                  />
+                </s>
+              </span>
               <Price
-                amount={String(product.price)}
+                className="text-red-500"
+                amount={discountedPrice!}
                 currencyCode={product.currency}
                 currencyCodeClassName="hidden"
               />
-            )}
-          </small>
-        </div>
+            </>
+          ) : (
+            <Price
+              amount={String(product.price)}
+              currencyCode={product.currency}
+              currencyCodeClassName="hidden"
+            />
+          )}
+        </small>
       </div>
     </div>
   );
