@@ -1,4 +1,5 @@
 import { ReadonlyURLSearchParams } from 'next/navigation';
+import { ProductVariant, ShopifyProduct } from './shopify/types';
 import { ProductTile } from './types';
 
 export const createUrl = (pathname: string, params: URLSearchParams | ReadonlyURLSearchParams) => {
@@ -47,15 +48,22 @@ const findMetafieldValue = (metafields: any[] | null | undefined, key: string): 
   return field?.value || '0';
 };
 
-export function transformProduct(product: any): ProductTile {
-  const allSizes: string[] = product.options
-    .flatMap((option) => option?.name === 'Size' && option?.values)
+export function transformProduct(product: ShopifyProduct): ProductTile {
+  const variants = product.variants as unknown as ProductVariant[];
+
+  const allSizes = product.options
+    .flatMap((option) =>
+      option?.name === 'Size' && Array.isArray(option?.values) ? option.values : []
+    )
     .filter(Boolean);
 
   const colors = [
     ...new Set(
-      product.variants
-        .map((variant) => variant.selectedOptions.find((option) => option.name === 'Color')?.value)
+      variants
+        .map(
+          (variant: { selectedOptions: { name: string; value: string }[] }) =>
+            variant.selectedOptions.find((option) => option.name === 'Color')?.value
+        )
         .filter(Boolean)
     )
   ];
@@ -79,24 +87,25 @@ export function transformProduct(product: any): ProductTile {
   const newColors = colors.map((colorVariant) => {
     const color = colorVariant as string;
     // Find base variant with color metafield
-    const baseVariant = product.variants.find(
+    const baseVariant = variants.find(
       (variant) =>
         variant.selectedOptions.find((option) => option.name === 'Color')?.value === color &&
         variant.metafields?.[0]?.key === 'color'
     );
 
+    console.log('BASE:::: ', baseVariant);
+
     // Get all variants for this color
-    const colorVariants = product.variants.filter(
+    const colorVariants = variants.filter(
       (variant) =>
         variant.selectedOptions.find((option) => option.name === 'Color')?.value === color
     );
 
     // Images
-    const primaryImage = baseVariant?.image;
+    const primaryImage = baseVariant?.image || null;
 
-    const secondaryImage = baseVariant?.metafields?.find(
-      (field: { key: string }) => field.key === 'second_image'
-    )?.reference?.image;
+    const secondaryImage = baseVariant?.metafields?.find((field) => field.key === 'second_image')
+      ?.reference?.image;
 
     return {
       name: color,

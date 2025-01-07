@@ -30,3 +30,34 @@ export type ProductTile = {
   colors?: ProductColor[] | null;
   sizes?: string[] | boolean;
 };
+
+export type Reference = {
+  image: ImageData;
+};
+
+export type SelectedOption = {
+  name: string;
+  value: string;
+};
+
+export type Price = {
+  amount: string;
+  currencyCode: string;
+};
+
+export type Metafield = {
+  key: string;
+  value: string;
+  reference: Reference | null;
+};
+
+export type BaseProductTileVariant = {
+  id: string;
+  title: string;
+  availableForSale: boolean;
+  image: ImageData;
+  metafields: Metafield[];
+  selectedOptions: SelectedOption[];
+  price: Price;
+  compareAtPrice: string | null;
+};

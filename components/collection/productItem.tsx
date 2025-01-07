@@ -10,6 +10,7 @@ export function ProductItem({ product, loading }: { product: ProductTile; loadin
   const initialImages = product.colors?.[0]?.images ?? null;
   const [selectedColor, setSelectedColor] = useState<string>(initialColor);
   const [selectedVariantImage, setVariantImage] = useState(initialImages);
+  const [isAvailable, setIsAvailable] = useState(true);
 
   const discount = product.discount ?? 0;
   const discountedPrice = product.discount
@@ -21,21 +22,21 @@ export function ProductItem({ product, loading }: { product: ProductTile; loadin
     const variant = product.colors?.find((c: any) => c.name === color);
     if (variant) {
       setVariantImage(variant.images);
+      setIsAvailable(variant.isAvailable);
     }
   };
-
-  console.log('Product:::', product);
 
   return (
     <div className="group relative flex flex-col overflow-hidden rounded-lg">
       <Link href={`/product/${product.handle}`} key={product.id} prefetch={true}>
         <div className="relative flex overflow-hidden rounded-lg border bg-white">
-          {discount > 0 && <Promo discountedPrice={String(product.discount)} />}
+          {discount > 0 && <IsOnSales />}
+          {!isAvailable && <IsSoldOut />}
           {product.colors && product.colors.length > 1 ? (
             <>
               {selectedVariantImage && (
                 <>
-                  <div className="absolute bottom-0 left-0 flex h-full w-full justify-center bg-white opacity-0 transition-opacity duration-150 ease-out hover:opacity-100">
+                  <div className="absolute bottom-0 left-0 flex h-full w-full items-end justify-center bg-white opacity-0 transition-opacity duration-150 ease-out hover:opacity-100">
                     <Image
                       className="h-fit object-cover object-center"
                       src={selectedVariantImage.secondary.url}
@@ -148,17 +149,24 @@ function ColorSwatch({
   );
 }
 
-function Promo({
-  text = 'On Sale!',
-  discountedPrice
-}: {
-  text?: string;
-  discountedPrice?: string;
-}) {
+function IsOnSales({ text = 'On Sale!' }) {
   return (
     <div className="absolute left-5 top-5 z-10 inline-flex h-7 items-center justify-center gap-3 overflow-hidden rounded-3xl border border-red-600 bg-white px-3 py-1.5">
       <div
-        className="h-4 w-16 text-center text-base font-medium leading-none text-red-600"
+        className="h-4 text-center text-base font-medium leading-none text-red-600"
+        aria-label="{text}"
+      >
+        {text}
+      </div>
+    </div>
+  );
+}
+
+function IsSoldOut({ text = 'Sold Out!' }) {
+  return (
+    <div className="absolute bottom-5 left-5 z-10 inline-flex h-7 items-center justify-center gap-3 overflow-hidden rounded-3xl border bg-black px-3 py-1.5">
+      <div
+        className="h-4 text-center text-base font-medium leading-none text-white"
         aria-label="{text}"
       >
         {text}
