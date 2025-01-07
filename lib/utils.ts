@@ -1,6 +1,6 @@
 import { ReadonlyURLSearchParams } from 'next/navigation';
 import { Product, ProductVariant } from './shopify/types';
-import { ProductTile } from './types';
+import type { ImageData, Metafield, ProductTile } from './types';
 
 export const createUrl = (pathname: string, params: URLSearchParams | ReadonlyURLSearchParams) => {
   const paramsString = params.toString();
@@ -38,6 +38,13 @@ export const validateEnvironmentVariables = () => {
       'Your `SHOPIFY_STORE_DOMAIN` environment variable includes brackets (ie. `[` and / or `]`). Your site will not work with them there. Please remove them.'
     );
   }
+};
+
+const defaultImage: ImageData = {
+  altText: '',
+  height: 0,
+  width: 0,
+  url: 'https://placehold.co/327x408.png'
 };
 
 //  Transform the product data from the Shopify Storefront API into a more manageable format while ensuring compliance with TypeScript linting rules.
@@ -93,8 +100,6 @@ export function transformProduct(product: Product): ProductTile {
         variant.metafields?.[0]?.key === 'color'
     );
 
-    console.log('BASE:::: ', baseVariant);
-
     // Get all variants for this color
     const colorVariants = variants.filter(
       (variant) =>
@@ -102,10 +107,12 @@ export function transformProduct(product: Product): ProductTile {
     );
 
     // Images
-    const primaryImage = baseVariant?.image || null;
+    const primaryImage = baseVariant?.image || defaultImage;
 
-    const secondaryImage = baseVariant?.metafields?.find((field) => field.key === 'second_image')
-      ?.reference?.image;
+    const secondaryImageField = (baseVariant?.metafields as Metafield[])?.find(
+      (field) => field.key === 'second_image'
+    );
+    const secondaryImage = secondaryImageField?.reference?.image || defaultImage;
 
     return {
       name: color,
@@ -114,22 +121,18 @@ export function transformProduct(product: Product): ProductTile {
         (variant: { availableForSale: boolean }) => variant.availableForSale
       ),
       images: {
-        primary: primaryImage
-          ? {
-              altText: primaryImage.altText,
-              height: primaryImage.height,
-              width: primaryImage.width,
-              url: primaryImage.url
-            }
-          : null,
-        secondary: secondaryImage
-          ? {
-              altText: secondaryImage.altText || primaryImage?.altText || null,
-              height: secondaryImage.height,
-              width: secondaryImage.width,
-              url: secondaryImage.url
-            }
-          : null
+        primary: {
+          altText: primaryImage.altText,
+          height: primaryImage.height,
+          width: primaryImage.width,
+          url: primaryImage.url
+        },
+        secondary: {
+          altText: secondaryImage.altText || primaryImage?.altText || null,
+          height: secondaryImage.height,
+          width: secondaryImage.width,
+          url: secondaryImage.url
+        }
       }
     };
   });
@@ -146,7 +149,7 @@ export function transformProduct(product: Product): ProductTile {
     price: parseFloat(product.priceRange.minVariantPrice.amount),
     currency: product.priceRange.minVariantPrice.currencyCode,
     discount,
-    colors: newColors,
+    colors: newColors.length > 0 ? newColors : null,
     sizes: allSizes
   };
 }
