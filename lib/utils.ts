@@ -1,5 +1,5 @@
 import { ReadonlyURLSearchParams } from 'next/navigation';
-import { ProductVariant, ShopifyProduct } from './shopify/types';
+import { Product, ProductVariant } from './shopify/types';
 import { ProductTile } from './types';
 
 export const createUrl = (pathname: string, params: URLSearchParams | ReadonlyURLSearchParams) => {
@@ -40,7 +40,7 @@ export const validateEnvironmentVariables = () => {
   }
 };
 
-//  goal to transform the product data from the Shopify Storefront API into a more manageable format and **satisfy the typescript lint rules**.
+//  Transform the product data from the Shopify Storefront API into a more manageable format while ensuring compliance with TypeScript linting rules.
 const findMetafieldValue = (metafields: any[] | null | undefined, key: string): string => {
   if (!metafields || !Array.isArray(metafields)) return '0';
 
@@ -48,7 +48,7 @@ const findMetafieldValue = (metafields: any[] | null | undefined, key: string): 
   return field?.value || '0';
 };
 
-export function transformProduct(product: ShopifyProduct): ProductTile {
+export function transformProduct(product: Product): ProductTile {
   const variants = product.variants as unknown as ProductVariant[];
 
   const allSizes = product.options
