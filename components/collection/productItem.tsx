@@ -6,9 +6,8 @@ import Link from 'next/link';
 import { useState } from 'react';
 
 export function ProductItem({ product, loading }: { product: ProductTile; loading?: boolean }) {
-  const initialColor = product.colors && product.colors.length > 0 ? product.colors[0].name : '';
-  const initialImages =
-    product.colors && product.colors.length > 0 ? product.colors[0].images : null;
+  const initialColor = product.colors?.[0]?.name ?? '';
+  const initialImages = product.colors?.[0]?.images ?? null;
   const [selectedColor, setSelectedColor] = useState<string>(initialColor);
   const [selectedVariantImage, setVariantImage] = useState(initialImages);
 
@@ -29,7 +28,6 @@ export function ProductItem({ product, loading }: { product: ProductTile; loadin
 
   return (
     <div className="group relative flex flex-col overflow-hidden rounded-lg">
-      {/* <div className="group relative grid items-center justify-center gap-2 overflow-hidden"> */}
       <Link href={`/product/${product.handle}`} key={product.id} prefetch={true}>
         <div className="relative flex overflow-hidden rounded-lg border bg-white">
           {discount > 0 && <Promo discountedPrice={String(product.discount)} />}
@@ -132,16 +130,21 @@ function ColorSwatch({
   onMouseEnter?: (event: React.MouseEvent<HTMLElement>) => void;
 }) {
   return (
-    <button
-      className={`h-6 w-6 rounded-full border-2 ${
-        isSelected ? 'border-black' : 'border-transparent'
-      } relative mr-2 ${isAvailable ? 'cursor-pointer' : 'opacity-30'}`}
-      aria-label={`Select ${color.name} color`}
-      onClick={onClick}
-      onMouseEnter={onMouseEnter}
-    >
-      <span className="absolute inset-0.5 rounded-full" style={{ backgroundColor: color.code }} />
-    </button>
+    <>
+      <button
+        className={`h-6 w-6 rounded-full border-2 hover:border-black ${
+          isSelected ? 'border-sky-900' : 'border-transparent'
+        } relative mr-1 ${isAvailable ? 'cursor-pointer' : 'opacity-30'}`}
+        aria-label={`Select ${color.name} color`}
+        onClick={onClick}
+        onMouseEnter={onMouseEnter}
+      >
+        <span className="absolute inset-0.5 rounded-full" style={{ backgroundColor: color.code }} />
+        {!isAvailable && (
+          <span className="absolute left-1/2 top-1/2 z-10 h-0.5 w-4 -translate-x-1/2 -translate-y-1/2 -rotate-45 bg-white" />
+        )}
+      </button>
+    </>
   );
 }
 

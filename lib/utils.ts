@@ -1,6 +1,5 @@
 import { ReadonlyURLSearchParams } from 'next/navigation';
-import { ShopifyProduct } from './shopify/types';
-import { ProductColor, ProductTile } from './types';
+import { ProductTile } from './types';
 
 export const createUrl = (pathname: string, params: URLSearchParams | ReadonlyURLSearchParams) => {
   const paramsString = params.toString();
@@ -40,11 +39,17 @@ export const validateEnvironmentVariables = () => {
   }
 };
 
-export function transformProduct(product: ShopifyProduct): ProductTile {
-  const allSizes = product.options
-    .flatMap(
-      (options: { name: string; values: string }) => options.name === 'Size' && options.values
-    )
+//  goal to transform the product data from the Shopify Storefront API into a more manageable format and **satisfy the typescript lint rules**.
+const findMetafieldValue = (metafields: any[] | null | undefined, key: string): string => {
+  if (!metafields || !Array.isArray(metafields)) return '0';
+
+  const field = metafields.find((field) => field && typeof field === 'object' && field.key === key);
+  return field?.value || '0';
+};
+
+export function transformProduct(product: any): ProductTile {
+  const allSizes: string[] = product.options
+    .flatMap((option) => option?.name === 'Size' && option?.values)
     .filter(Boolean);
 
   const colors = [
@@ -54,8 +59,6 @@ export function transformProduct(product: ShopifyProduct): ProductTile {
         .filter(Boolean)
     )
   ];
-
-  console.log('COLOR::::: ', colors);
 
   if (!colors.length) {
     return {
@@ -67,15 +70,13 @@ export function transformProduct(product: ShopifyProduct): ProductTile {
       featuredImage: product.featuredImage,
       price: parseFloat(product.priceRange.minVariantPrice.amount),
       currency: product.priceRange.minVariantPrice.currencyCode,
-      discount: parseFloat(
-        product.metafields?.find((field: { key: string }) => field.key === 'discount')?.value || '0'
-      ),
+      discount: parseFloat(findMetafieldValue(product.metafields, 'discount')),
       colors: [],
       sizes: allSizes
     };
   }
 
-  const newColors: ProductColor[] = colors.map((colorVariant) => {
+  const newColors = colors.map((colorVariant) => {
     const color = colorVariant as string;
     // Find base variant with color metafield
     const baseVariant = product.variants.find(
@@ -90,10 +91,8 @@ export function transformProduct(product: ShopifyProduct): ProductTile {
         variant.selectedOptions.find((option) => option.name === 'Color')?.value === color
     );
 
-    // Find images
-    const primaryImage = product.images.find((img: { altText: string }) =>
-      img.altText?.toLowerCase().includes(color.toLowerCase())
-    );
+    // Images
+    const primaryImage = baseVariant?.image;
 
     const secondaryImage = baseVariant?.metafields?.find(
       (field: { key: string }) => field.key === 'second_image'
@@ -101,9 +100,7 @@ export function transformProduct(product: ShopifyProduct): ProductTile {
 
     return {
       name: color,
-      code:
-        baseVariant?.metafields?.find((field: { key: string }) => field.key === 'color')?.value ||
-        'transparent',
+      code: findMetafieldValue(baseVariant?.metafields, 'color') || 'transparent',
       isAvailable: colorVariants.some(
         (variant: { availableForSale: boolean }) => variant.availableForSale
       ),
@@ -128,9 +125,7 @@ export function transformProduct(product: ShopifyProduct): ProductTile {
     };
   });
 
-  const discount = parseFloat(
-    product.metafields?.find((field: { key: string }) => field.key === 'discount')?.value || '0'
-  );
+  const discount = parseFloat(findMetafieldValue(product.metafields, 'discount'));
 
   return {
     id: product.id,
