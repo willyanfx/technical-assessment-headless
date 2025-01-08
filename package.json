@@ -1,5 +1,8 @@
 {
+  "name": "technical-assessment-headless",
+  "homepage": "technical-assessment-headless.vercel.app",
   "private": true,
+  "author": "willyanfx",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
