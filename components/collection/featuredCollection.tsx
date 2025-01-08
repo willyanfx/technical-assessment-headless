@@ -21,7 +21,7 @@ export default async function FeaturedCollection() {
   );
 }
 
-// This fragment is similar to the product fragment found in `lib/shopify/fragments/product.ts`, but it includes more detailed information, such as specific fields like metafields for sales discounts, variant color hex codes, and a second image.
+// This fragment is similar to the product fragment found in `lib/shopify/fragments/product.ts`, but it removed no needed ones and includes extra fields such as specific fields like metafields for sales discounts, variant color hex codes, and a second image.
 
 // **TODO:** Make the `getCollectionProducts` function flexible to accept custom fragments and variables.
 
