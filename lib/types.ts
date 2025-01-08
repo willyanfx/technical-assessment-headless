@@ -62,13 +62,6 @@ export type BaseProductTileVariant = {
   compareAtPrice: string | null;
 };
 
-export type PriceDisplayProps = {
-  price: number;
-  discountedPrice: string | null;
-  currency: string;
-  discount: number;
-};
-
 export type ProductImageProps = {
   image: ImageData;
   title: string;

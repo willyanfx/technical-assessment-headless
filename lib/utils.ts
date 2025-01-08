@@ -44,7 +44,7 @@ const defaultImage: ImageData = {
   altText: '',
   height: 0,
   width: 0,
-  url: 'https://placehold.co/327x408.png'
+  url: ''
 };
 
 //  Transform the product data from the Shopify Storefront API into a more manageable format while ensuring compliance with TypeScript linting rules.
