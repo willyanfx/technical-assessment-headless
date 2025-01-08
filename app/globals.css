@@ -19,3 +19,29 @@ input,
 button {
   @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-50 dark:focus-visible:ring-neutral-600 dark:focus-visible:ring-offset-neutral-900;
 }
+
+.tooltip-button::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 125%; /* Position above the button */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: #fff;
+  padding: 5px;
+  border-radius: 5px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s;
+  @apply bg-slate-700;
+}
+
+.tooltip-button:hover::after {
+  opacity: 0.8;
+  visibility: visible;
+}
+
+.toast-show {
+  visibility: visible;
+}

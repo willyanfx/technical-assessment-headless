@@ -2,11 +2,16 @@ import imageFragment from './image';
 import seoFragment from './seo';
 
 const productFragment = /* GraphQL */ `
+  fragment MoneyProductItem on MoneyV2 {
+    amount
+    currencyCode
+  }
   fragment product on Product {
     id
     handle
     availableForSale
     title
+    vendor
     description
     descriptionHtml
     options {
@@ -14,14 +19,20 @@ const productFragment = /* GraphQL */ `
       name
       values
     }
-    priceRange {
-      maxVariantPrice {
-        amount
-        currencyCode
-      }
+    compareAtPriceRange {
       minVariantPrice {
-        amount
-        currencyCode
+        ...MoneyProductItem
+      }
+      maxVariantPrice {
+        ...MoneyProductItem
+      }
+    }
+    priceRange {
+      minVariantPrice {
+        ...MoneyProductItem
+      }
+      maxVariantPrice {
+        ...MoneyProductItem
       }
     }
     variants(first: 250) {
@@ -35,8 +46,10 @@ const productFragment = /* GraphQL */ `
             value
           }
           price {
-            amount
-            currencyCode
+            ...MoneyProductItem
+          }
+          compareAtPrice {
+            ...MoneyProductItem
           }
         }
       }
